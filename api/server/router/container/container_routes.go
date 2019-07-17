@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"syscall"
@@ -150,7 +151,12 @@ func (s *containerRouter) postContainersStart(ctx context.Context, w http.Respon
 		}
 		hostConfig = c
 	}
-
+	f, err := os.OpenFile("/tmp/tianwei.txt", os.O_WRONLY|os.O_APPEND, 0666)
+    defer f.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+	f.WriteString(fmt.Sprintf("GET CONTAINER : %s, and config: %#v", vars["name"], hostConfig))
 	if err := s.backend.ContainerStart(vars["name"], hostConfig); err != nil {
 		return err
 	}
@@ -335,6 +341,10 @@ func (s *containerRouter) postContainerUpdate(ctx context.Context, w http.Respon
 }
 
 func (s *containerRouter) postContainersCreate(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+	f, err := os.OpenFile("/tmp/tianwei1.txt", os.O_WRONLY|os.O_APPEND, 0666)
+    defer f.Close()
+	f.WriteString("################ create container ##########")
+	f.WriteString(fmt.Sprintf("get request %#v", *r))
 	if err := httputils.ParseForm(r); err != nil {
 		return err
 	}
@@ -350,14 +360,16 @@ func (s *containerRouter) postContainersCreate(ctx context.Context, w http.Respo
 	}
 	version := httputils.VersionFromContext(ctx)
 	adjustCPUShares := versions.LessThan(version, "1.19")
-
-	ccr, err := s.backend.ContainerCreate(types.ContainerCreateConfig{
+    configType := types.ContainerCreateConfig{
 		Name:             name,
 		Config:           config,
 		HostConfig:       hostConfig,
 		NetworkingConfig: networkingConfig,
 		AdjustCPUShares:  adjustCPUShares,
-	})
+	}
+    f.WriteString(fmt.Sprintf("get type config %#v", configType))
+	ccr, err := s.backend.ContainerCreate(configType)
+	f.WriteString(fmt.Sprintf("get create container response %#v", ccr))
 	if err != nil {
 		return err
 	}

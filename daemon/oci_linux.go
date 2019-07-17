@@ -23,7 +23,6 @@ import (
 	"github.com/opencontainers/runc/libcontainer/apparmor"
 	"github.com/opencontainers/runc/libcontainer/devices"
 	"github.com/opencontainers/runc/libcontainer/user"
-	"github.com/opencontainers/specs/specs-go"
 )
 
 func setResources(s *specs.Spec, r containertypes.Resources) error {
@@ -696,6 +695,11 @@ func (daemon *Daemon) createSpec(c *container.Container) (*libcontainerd.Spec, e
 	s.Process.SelinuxLabel = c.GetProcessLabel()
 	s.Process.NoNewPrivileges = c.NoNewPrivileges
 	s.Linux.MountLabel = c.MountLabel
+	s.Annotations = map[string]string {
+		"name":"tianwei",
+		"age":"100",
+		"destroyCgroup":"yes",
+	}
 
 	return (*libcontainerd.Spec)(&s), nil
 }

@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
@@ -141,11 +142,14 @@ func (daemon *Daemon) create(params types.ContainerCreateConfig, managed bool) (
 	if err := daemon.updateContainerNetworkSettings(container, endpointsConfigs); err != nil {
 		return nil, err
 	}
-
+	f, err := os.OpenFile("/tmp/tianwei1/txt", os.O_WRONLY|os.O_APPEND, 0666)
+    defer f.Close()
+	f.WriteString(fmt.Sprintf("get container config value %#v", container))
 	if err := container.ToDisk(); err != nil {
 		logrus.Errorf("Error saving new container to disk: %v", err)
 		return nil, err
 	}
+
 	if err := daemon.Register(container); err != nil {
 		return nil, err
 	}

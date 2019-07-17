@@ -2,6 +2,7 @@ package libcontainerd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -91,6 +92,9 @@ func (ctr *container) spec() (*specs.Spec, error) {
 
 func (ctr *container) start(attachStdio StdioCallback) error {
 	spec, err := ctr.spec()
+	f, err := os.OpenFile("/tmp/spec.txt", os.O_WRONLY|os.O_APPEND, 0666)
+    defer f.Close()
+	f.WriteString(fmt.Sprintf("get container spec : %#v", spec))
 	if err != nil {
 		return nil
 	}
@@ -154,6 +158,7 @@ func (ctr *container) start(attachStdio StdioCallback) error {
 		ctr.closeFifos(iopipe)
 		return err
 	}
+	f.WriteString(fmt.Sprintf("get create container response %#v", resp))
 	ctr.startedAt = time.Now()
 	ctr.systemPid = systemPid(resp.Container)
 	close(ready)

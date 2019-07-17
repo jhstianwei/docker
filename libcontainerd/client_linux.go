@@ -174,6 +174,9 @@ func (clnt *client) Create(containerID string, spec Spec, attachStdio StdioCallb
 	if err := container.clean(); err != nil {
 		return err
 	}
+	f, err := os.OpenFile("/tmp/tianwei3.txt", os.O_WRONLY|os.O_APPEND, 0666)
+	defer f.Close()
+	f.WriteString(fmt.Sprintf("libcontainerd container: %#v", container))
 	container.attachStdio = attachStdio // hack for v1.12 backport
 
 	defer func() {

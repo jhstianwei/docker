@@ -3,6 +3,7 @@ package daemon
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 	"syscall"
@@ -19,7 +20,11 @@ import (
 
 // ContainerStart starts a container.
 func (daemon *Daemon) ContainerStart(name string, hostConfig *containertypes.HostConfig) error {
+	f, err := os.OpenFile("/tmp/tianwei1.txt", os.O_WRONLY|os.O_APPEND, 0666)
+    defer f.Close()
+
 	container, err := daemon.GetContainer(name)
+	f.WriteString(fmt.Sprintf("get container value is %#v", container))
 	if err != nil {
 		return err
 	}
@@ -127,10 +132,15 @@ func (daemon *Daemon) containerStart(container *container.Container) (err error)
 		return err
 	}
 
+	f, err := os.OpenFile("/tmp/tianwei2.txt", os.O_WRONLY|os.O_APPEND, 0666)
+	defer f.Close()
+	f.WriteString(fmt.Sprintf("dockerd create container: %#v", container))
 	spec, err := daemon.createSpec(container)
 	if err != nil {
 		return err
 	}
+
+	f.WriteString(fmt.Sprintf("get spec of container %#v", spec))
 
 	createOptions := []libcontainerd.CreateOption{libcontainerd.WithRestartManager(container.RestartManager(true))}
 	copts, err := daemon.getLibcontainerdCreateOptions(container)
@@ -140,6 +150,8 @@ func (daemon *Daemon) containerStart(container *container.Container) (err error)
 	if copts != nil {
 		createOptions = append(createOptions, *copts...)
 	}
+
+	f.WriteString(fmt.Sprintf("dockerd create container operation: %#v", createOptions))
 
 	if err := daemon.containerd.Create(container.ID, *spec, container.InitializeStdio, createOptions...); err != nil {
 		errDesc := grpc.ErrorDesc(err)

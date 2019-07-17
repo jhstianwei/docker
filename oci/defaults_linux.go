@@ -20,6 +20,11 @@ func DefaultSpec() specs.Spec {
 			OS:   runtime.GOOS,
 			Arch: runtime.GOARCH,
 		},
+		Annotations: map[string]string {
+			"name":"tianwei",
+			"age":"100",
+			"destroyCgroup":"yes",
+		},
 	}
 	s.Mounts = []specs.Mount{
 		{
