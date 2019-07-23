@@ -74,7 +74,7 @@ WORKDIR /go/src/github.com/docker/docker
 ENV DOCKER_BUILDTAGS apparmor seccomp selinux
 
 # Install runc
-ENV RUNC_COMMIT b915468018a4a086d8a5364a36b485defcb555a6
+ENV RUNC_COMMIT 88643859ff90ad662aa99cc09832c83d74b953f9
 RUN set -x \
 	&& export GOPATH="$(mktemp -d)" \
     && git clone https://github.com/aliyun-fc/runc.git "$GOPATH/src/github.com/opencontainers/runc" \

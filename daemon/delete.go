@@ -71,17 +71,6 @@ func (daemon *Daemon) ContainerRm(name string, config *types.ContainerRmConfig) 
 		return err
 	}
 
-	defer func() {
-		if c := daemon.containers.Get(container.ID); c == nil {
-			cgroupPaths := make(map[string]string)
-			for s, p := range cgroupFilePaths {
-				cgroupPaths[s] = fmt.Sprintf(p, container.ID)
-			}
-
-			removePaths(cgroupPaths)
-		}
-	}()
-
 	// Container state RemovalInProgress should be used to avoid races.
 	if inProgress := container.SetRemovalInProgress(); inProgress {
 		return nil
@@ -189,6 +178,17 @@ func (daemon *Daemon) cleanupContainer(container *container.Container, forceRemo
 		if err != nil && err != layer.ErrMountDoesNotExist {
 			return fmt.Errorf("Driver %s failed to remove root filesystem %s: %s", daemon.GraphDriverName(), container.ID, err)
 		}
+	}
+
+	// destroy cgroup files
+	cgroupPaths := make(map[string]string)
+	for s, p := range cgroupFilePaths {
+		cgroupPaths[s] = fmt.Sprintf(p, container.ID)
+	}
+
+	err = removePaths(cgroupPaths)
+	if err != nil {
+		return fmt.Errorf("Fail to Destroy cgroups of container %s, err %s", container.ID, err)
 	}
 
 	return nil
